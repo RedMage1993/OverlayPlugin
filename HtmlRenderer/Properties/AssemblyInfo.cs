@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("HtmlRenderer")]
-[assembly: AssemblyCopyright("Copyright © RainbowMage 2014, Kuriyama hibiya 2016")]
+[assembly: AssemblyCopyright("Copyright © RainbowMage 2014, Kuriyama hibiya 2016, RedMage1993 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
