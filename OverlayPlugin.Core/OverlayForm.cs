@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Xilium.CefGlue;
+using Microsoft.WindowsAPICodePack.Taskbar;
 
 namespace RainbowMage.OverlayPlugin
 {
@@ -294,6 +295,8 @@ namespace RainbowMage.OverlayPlugin
                     }
                 }
             }, null, 0, 1000);
+
+            TaskbarManager.Instance.SetApplicationIdForSpecificWindow(this.Handle, "redmage1993.OverlayPlugin.com");
         }
 
         private void OverlayForm_FormClosed(object sender, FormClosedEventArgs e)
