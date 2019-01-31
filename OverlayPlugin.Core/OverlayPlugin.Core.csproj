@@ -35,9 +35,22 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Thirdparty\ACT\Advanced Combat Tracker.exe</HintPath>
     </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\WindowsCodePack\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\WindowsCodePack\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ShellExtensions, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\WindowsCodePack\Microsoft.WindowsAPICodePack.ShellExtensions.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\Thirdparty\Newtonsoft.Json\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -132,6 +145,13 @@
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="lib\WindowsCodePack\Microsoft.WindowsAPICodePack.dll" />
+    <None Include="lib\WindowsCodePack\Microsoft.WindowsAPICodePack.Shell.dll" />
+    <None Include="lib\WindowsCodePack\Microsoft.WindowsAPICodePack.Shell.xml" />
+    <None Include="lib\WindowsCodePack\Microsoft.WindowsAPICodePack.ShellExtensions.dll" />
+    <None Include="lib\WindowsCodePack\Microsoft.WindowsAPICodePack.ShellExtensions.XML" />
+    <None Include="lib\WindowsCodePack\Microsoft.WindowsAPICodePack.xml" />
     <Content Include="resources\label.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -220,6 +240,9 @@
       <Project>{423fcbfc-dd3b-415f-be29-7a4a46614b79}</Project>
       <Name>OverlayPlugin.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
