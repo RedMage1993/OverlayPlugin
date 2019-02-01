@@ -89,12 +89,12 @@ namespace RainbowMage.OverlayPlugin
             get
             {
                 const int WS_EX_TOPMOST = 0x00000008;
-                const int WS_EX_LAYERED = 0x00080000;
+                //const int WS_EX_LAYERED = 0x00080000;
                 const int CP_NOCLOSE_BUTTON = 0x200;
                 const int WS_EX_NOACTIVATE = 0x08000000;
 
                 var cp = base.CreateParams;
-                cp.ExStyle = cp.ExStyle | WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_NOACTIVATE;
+                cp.ExStyle = cp.ExStyle | WS_EX_TOPMOST | WS_EX_NOACTIVATE;
                 cp.ClassStyle = cp.ClassStyle | CP_NOCLOSE_BUTTON;
 
                 return cp;
@@ -138,67 +138,74 @@ namespace RainbowMage.OverlayPlugin
         {
             if (surfaceBuffer.IsDisposed || this.terminated) { return; }
 
-            using (var gScreen = Graphics.FromHwnd(IntPtr.Zero))
+            using (var gScreen = Graphics.FromHwnd(this.Handle))
             {
                 var hScreenDC = gScreen.GetHdc();
                 var hOldBitmap = NativeMethods.SelectObject(surfaceBuffer.DeviceContext, surfaceBuffer.Handle);
 
-                var blend = new NativeMethods.BlendFunction
+                var blend = new NativeMethods.BLENDFUNCTION
                 {
                     BlendOp = NativeMethods.AC_SRC_OVER,
                     BlendFlags = 0,
                     SourceConstantAlpha = 255,
                     AlphaFormat = NativeMethods.AC_SRC_ALPHA
                 };
-                var windowPosition = new NativeMethods.Point
-                {
-                    X = this.Left,
-                    Y = this.Top
-                };
-                var surfaceSize = new NativeMethods.Size
-                {
-                    Width = surfaceBuffer.Width,
-                    Height = surfaceBuffer.Height
-                };
-                var surfacePosition = new NativeMethods.Point
-                {
-                    X = 0,
-                    Y = 0
-                };
 
-                IntPtr handle = IntPtr.Zero;
-                try
-                {
-                    if (!this.terminated)
-                    {
-                        if (this.InvokeRequired)
-                        {
-                            this.Invoke(new Action(() =>
-                            {
-                                handle = this.Handle;
-                            }));
-                        }
-                        else
-                        {
-                            handle = this.Handle;
-                        }
+                //var windowPosition = new NativeMethods.Point
+                //{
+                //    X = this.Left,
+                //    Y = this.Top
+                //};
 
-                        NativeMethods.UpdateLayeredWindow(
-                            handle,
-                            hScreenDC,
-                            ref windowPosition,
-                            ref surfaceSize,
-                            surfaceBuffer.DeviceContext, //hBitmap,
-                            ref surfacePosition,
-                            0,
-                            ref blend,
-                            NativeMethods.ULW_ALPHA);
-                    }
-                }
-                catch (ObjectDisposedException)
-                {
-                    return;
-                }
+                //var surfaceSize = new NativeMethods.Size
+                //{
+                //    Width = surfaceBuffer.Width,
+                //    Height = surfaceBuffer.Height
+                //};
+
+                //var surfacePosition = new NativeMethods.Point
+                //{
+                //    X = 0,
+                //    Y = 0
+                //};
+
+                //IntPtr handle = IntPtr.Zero;
+                //try
+                //{
+                //    if (!this.terminated)
+                //    {
+                //        if (this.InvokeRequired)
+                //        {
+                //            this.Invoke(new Action(() =>
+                //            {
+                //                handle = this.Handle;
+                //            }));
+                //        }
+                //        else
+                //        {
+                //            handle = this.Handle;
+                //        }
+
+                //        NativeMethods.UpdateLayeredWindow(
+                //            handle,
+                //            hScreenDC,
+                //            ref windowPosition,
+                //            ref surfaceSize,
+                //            surfaceBuffer.DeviceContext, //hBitmap,
+                //            ref surfacePosition,
+                //            0,
+                //            ref blend,
+                //            NativeMethods.ULW_ALPHA);
+                //    }
+                //}
+                //catch (ObjectDisposedException)
+                //{
+                //    return;
+                //}
+
+                NativeMethods.BitBlt(hScreenDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, NativeMethods.TernaryRasterOperations.SRCCOPY);
+                //NativeMethods.TransparentBlt(hScreenDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, 0);
+                //NativeMethods.AlphaBlend(hScreenDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, blend);
 
                 NativeMethods.SelectObject(surfaceBuffer.DeviceContext, hOldBitmap);
                 gScreen.ReleaseHdc(hScreenDC);

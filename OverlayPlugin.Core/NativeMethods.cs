@@ -12,28 +12,28 @@ namespace RainbowMage.OverlayPlugin
     /// </summary>
     static class NativeMethods
     {
-        public struct BlendFunction
-        {
-            public byte BlendOp;
-            public byte BlendFlags;
-            public byte SourceConstantAlpha;
-            public byte AlphaFormat;
-        }
+        //public struct BlendFunction
+        //{
+        //    public byte BlendOp;
+        //    public byte BlendFlags;
+        //    public byte SourceConstantAlpha;
+        //    public byte AlphaFormat;
+        //}
 
         public const byte AC_SRC_ALPHA = 1;
         public const byte AC_SRC_OVER = 0;
 
-        public struct Point
-        {
-            public int X;
-            public int Y;
-        }
+        //public struct Point
+        //{
+        //    public int X;
+        //    public int Y;
+        //}
 
-        public struct Size
-        {
-            public int Width;
-            public int Height;
-        }
+        //public struct Size
+        //{
+        //    public int Width;
+        //    public int Height;
+        //}
 
         //public struct Rect
         //{
@@ -43,17 +43,17 @@ namespace RainbowMage.OverlayPlugin
         //    public int Bottom;
         //}
 
-        [DllImport("user32")]
-        public static extern bool UpdateLayeredWindow(
-            IntPtr hWnd,
-            IntPtr hdcDst,
-            [In] ref Point pptDst,
-            [In]ref Size pSize,
-            IntPtr hdcSrc,
-            [In]ref Point pptSrc,
-            int crKey,
-            [In]ref BlendFunction pBlend,
-            uint dwFlags);
+        //[DllImport("user32")]
+        //public static extern bool UpdateLayeredWindow(
+        //    IntPtr hWnd,
+        //    IntPtr hdcDst,
+        //    [In] ref Point pptDst,
+        //    [In]ref Size pSize,
+        //    IntPtr hdcSrc,
+        //    [In]ref Point pptSrc,
+        //    int crKey,
+        //    [In]ref BlendFunction pBlend,
+        //    uint dwFlags);
 
         public const int ULW_ALPHA = 2;
 
@@ -232,5 +232,77 @@ namespace RainbowMage.OverlayPlugin
         public const int WM_SYSKEYDOWN = 0x0104;
         public const int WM_SYSKEYUP = 0x0105;
         public const int WM_SYSCHAR = 0x0106;
+
+        /// <summary>
+        ///     Specifies a raster-operation code. These codes define how the color data for the
+        ///     source rectangle is to be combined with the color data for the destination
+        ///     rectangle to achieve the final color.
+        /// </summary>
+        public enum TernaryRasterOperations : uint
+        {
+            /// <summary>dest = source</summary>
+            SRCCOPY = 0x00CC0020,
+            /// <summary>dest = source OR dest</summary>
+            SRCPAINT = 0x00EE0086,
+            /// <summary>dest = source AND dest</summary>
+            SRCAND = 0x008800C6,
+            /// <summary>dest = source XOR dest</summary>
+            SRCINVERT = 0x00660046,
+            /// <summary>dest = source AND (NOT dest)</summary>
+            SRCERASE = 0x00440328,
+            /// <summary>dest = (NOT source)</summary>
+            NOTSRCCOPY = 0x00330008,
+            /// <summary>dest = (NOT src) AND (NOT dest)</summary>
+            NOTSRCERASE = 0x001100A6,
+            /// <summary>dest = (source AND pattern)</summary>
+            MERGECOPY = 0x00C000CA,
+            /// <summary>dest = (NOT source) OR dest</summary>
+            MERGEPAINT = 0x00BB0226,
+            /// <summary>dest = pattern</summary>
+            PATCOPY = 0x00F00021,
+            /// <summary>dest = DPSnoo</summary>
+            PATPAINT = 0x00FB0A09,
+            /// <summary>dest = pattern XOR dest</summary>
+            PATINVERT = 0x005A0049,
+            /// <summary>dest = (NOT dest)</summary>
+            DSTINVERT = 0x00550009,
+            /// <summary>dest = BLACK</summary>
+            BLACKNESS = 0x00000042,
+            /// <summary>dest = WHITE</summary>
+            WHITENESS = 0x00FF0062,
+            /// <summary>
+            /// Capture window as seen on screen.  This includes layered windows 
+            /// such as WPF windows with AllowsTransparency="true"
+            /// </summary>
+            CAPTUREBLT = 0x40000000
+        }
+
+        [DllImport("gdi32.dll", EntryPoint = "BitBlt", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool BitBlt([In] IntPtr hdc, int nXDest, int nYDest, int nWidth, int nHeight, [In] IntPtr hdcSrc, int nXSrc, int nYSrc, TernaryRasterOperations dwRop);
+
+        [DllImport("msimg32.dll", EntryPoint = "TransparentBlt", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern int TransparentBlt(IntPtr hdc, int nXDest, int nYDest, int nWidth, int nHeight, IntPtr hdcSrc, int nXSrc, int nYSrc, int nWidthSrc, int nHeightSrc, uint clTransparent);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct BLENDFUNCTION
+        {
+            public byte BlendOp;
+            public byte BlendFlags;
+            public byte SourceConstantAlpha;
+            public byte AlphaFormat;
+
+            public BLENDFUNCTION(byte op, byte flags, byte alpha, byte format)
+            {
+                BlendOp = op;
+                BlendFlags = flags;
+                SourceConstantAlpha = alpha;
+                AlphaFormat = format;
+            }
+        }
+
+        [DllImport("gdi32.dll", EntryPoint = "GdiAlphaBlend")]
+        public static extern bool AlphaBlend(IntPtr hdcDest, int nXOriginDest, int nYOriginDest, int nWidthDest, int nHeightDest, IntPtr hdcSrc, int nXOriginSrc, int nYOriginSrc, int nWidthSrc, int nHeightSrc, BLENDFUNCTION blendFunction);
     }
 }
