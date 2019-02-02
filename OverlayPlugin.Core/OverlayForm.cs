@@ -168,17 +168,17 @@ namespace RainbowMage.OverlayPlugin
         {
             if (surfaceBuffer.IsDisposed || this.terminated) { return; }
 
-            using (var gScreen = Graphics.FromHwnd(Handle))
+            using (var gWindow = Graphics.FromHwnd(Handle))
             {
-                var hScreenDC = gScreen.GetHdc();
+                var hWindowDC = gWindow.GetHdc();
                 var hOldBitmap = NativeMethods.SelectObject(surfaceBuffer.DeviceContext, surfaceBuffer.Handle);
 
-                //NativeMethods.BitBlt(hScreenDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, NativeMethods.TernaryRasterOperations.SRCCOPY);
-                var originalPen = NativeMethods.SelectObject(hScreenDC, NativeMethods.GetStockObject(NativeMethods.StockObjects.NULL_PEN));
-                NativeMethods.Rectangle(hScreenDC, 0, 0, Width + 1, Height + 1);
-                NativeMethods.SelectObject(hScreenDC, originalPen);
+                var originalPen = NativeMethods.SelectObject(hWindowDC, NativeMethods.GetStockObject(NativeMethods.StockObjects.NULL_PEN));
+                NativeMethods.Rectangle(hWindowDC, -1, -1, Width + 1, Height + 1);
+                NativeMethods.SelectObject(hWindowDC, originalPen);
 
-                NativeMethods.AlphaBlend(hScreenDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, blend);
+                //NativeMethods.BitBlt(hWindowDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, NativeMethods.TernaryRasterOperations.SRCCOPY);
+                NativeMethods.AlphaBlend(hWindowDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, blend);
 
                 //var windowPosition = new NativeMethods.Point
                 //{
@@ -234,7 +234,7 @@ namespace RainbowMage.OverlayPlugin
                 //}     
 
                 NativeMethods.SelectObject(surfaceBuffer.DeviceContext, hOldBitmap);
-                gScreen.ReleaseHdc(hScreenDC);
+                gWindow.ReleaseHdc(hWindowDC);
             }
         }
         #endregion
@@ -338,7 +338,9 @@ namespace RainbowMage.OverlayPlugin
 
             //const int LWA_COLORKEY = 0x00000001;
 
-            //NativeMethods.SetLayeredWindowAttributes(Handle, 0, 0, LWA_COLORKEY);
+            //NativeMethods.SetLayeredWindowAttributes(Handle, NativeMethods.MakeCOLORREF(255, 255, 255), 0, LWA_COLORKEY);
+            //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            //BackColor = Color.Transparent;
         }
 
         private void OverlayForm_FormClosed(object sender, FormClosedEventArgs e)

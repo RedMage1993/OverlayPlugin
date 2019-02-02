@@ -433,5 +433,10 @@ namespace RainbowMage.OverlayPlugin
 
         [DllImport("gdi32.dll", EntryPoint = "SelectObject")]
         public static extern IntPtr SelectObject([In] IntPtr hdc, [In] IntPtr hgdiobj);
+
+        public static uint MakeCOLORREF(byte r, byte g, byte b)
+        {
+            return (((uint)r) | (((uint)g) << 8) | (((uint)b) << 16));
+        }
     }
 }
