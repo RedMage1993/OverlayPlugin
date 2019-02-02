@@ -281,7 +281,7 @@ namespace RainbowMage.OverlayPlugin
                 try
                 {
                     if (surfaceBuffer != null &&
-                        (surfaceBuffer.Width != Width || surfaceBuffer.Height != Height))
+                        (surfaceBuffer.Width != e.Width || surfaceBuffer.Height != e.Height))
                     {
                         surfaceBuffer.Dispose();
                         surfaceBuffer = null;
@@ -292,13 +292,13 @@ namespace RainbowMage.OverlayPlugin
                         using (var gScreen = Graphics.FromHwnd(Handle))
                         {
                             var hScreenDC = gScreen.GetHdc();
-                            surfaceBuffer = new DIBitmap(Width, Height);
+                            surfaceBuffer = new DIBitmap(e.Width, e.Height);
                             gScreen.ReleaseHdc(hScreenDC);
                         }
                     }
 
                     // TODO: DirtyRect に対応
-                    surfaceBuffer.SetSurfaceData(e.Buffer, (uint)(Width * Height * 4));
+                    surfaceBuffer.SetSurfaceData(e.Buffer, (uint)(e.Width * e.Height * 4));
 
                     UpdateLayeredWindowBitmap();
                 }

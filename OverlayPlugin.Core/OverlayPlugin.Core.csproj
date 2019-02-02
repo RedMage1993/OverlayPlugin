@@ -145,7 +145,6 @@
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
     <None Include="lib\WindowsCodePack\Microsoft.WindowsAPICodePack.dll" />
     <None Include="lib\WindowsCodePack\Microsoft.WindowsAPICodePack.Shell.dll" />
     <None Include="lib\WindowsCodePack\Microsoft.WindowsAPICodePack.Shell.xml" />
