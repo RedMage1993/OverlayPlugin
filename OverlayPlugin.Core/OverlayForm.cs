@@ -27,6 +27,13 @@ namespace RainbowMage.OverlayPlugin
         private bool shiftKeyPressed = false;
         private bool altKeyPressed = false;
         private bool controlKeyPressed = false;
+        private NativeMethods.BLENDFUNCTION blend = new NativeMethods.BLENDFUNCTION
+        {
+            BlendOp = NativeMethods.AC_SRC_OVER,
+            BlendFlags = 0,
+            SourceConstantAlpha = 255,
+            AlphaFormat = NativeMethods.AC_SRC_ALPHA
+        };
 
         public Renderer Renderer { get; private set; }
 
@@ -88,14 +95,18 @@ namespace RainbowMage.OverlayPlugin
         {
             get
             {
+                //const int WS_POPUP = unchecked((int)0x80000000);
                 const int WS_EX_TOPMOST = 0x00000008;
-                //const int WS_EX_LAYERED = 0x00080000;
-                const int CP_NOCLOSE_BUTTON = 0x200;
+                const int WS_EX_LAYERED = 0x00080000;
                 const int WS_EX_NOACTIVATE = 0x08000000;
+                const int CS_NOCLOSE = 0x200;
+                const int CS_VREDRAW = 0x0001;
+                const int CS_HREDRAW = 0x0002;
 
                 var cp = base.CreateParams;
-                cp.ExStyle = cp.ExStyle | WS_EX_TOPMOST | WS_EX_NOACTIVATE;
-                cp.ClassStyle = cp.ClassStyle | CP_NOCLOSE_BUTTON;
+                cp.Style = cp.Style;// | WS_POPUP;
+                cp.ExStyle = cp.ExStyle | WS_EX_TOPMOST | WS_EX_NOACTIVATE | WS_EX_LAYERED;
+                cp.ClassStyle = cp.ClassStyle | CS_NOCLOSE | CS_VREDRAW | CS_HREDRAW;
 
                 return cp;
             }
@@ -111,26 +122,45 @@ namespace RainbowMage.OverlayPlugin
 
             const int gripSize = 16;
 
-            if (m.Msg == WM_NCHITTEST && !this.Locked)
+            //const int WM_PAINT = 0xF;
+            //NativeMethods.PAINTSTRUCT ps;
+
+            switch (m.Msg)
             {
-                var posisiton = new Point(m.LParam.ToInt32() & 0xFFFF, m.LParam.ToInt32() >> 16);
-                posisiton = this.PointToClient(posisiton);
-                if (posisiton.X >= this.ClientSize.Width - gripSize &&
-                    posisiton.Y >= this.ClientSize.Height - gripSize)
-                {
-                    m.Result = (IntPtr)HTBOTTOMRIGHT;
-                    return;
-                }
-            }
-            
-            if (m.Msg == NativeMethods.WM_KEYDOWN ||
-                m.Msg == NativeMethods.WM_KEYUP ||
-                m.Msg == NativeMethods.WM_CHAR ||
-                m.Msg == NativeMethods.WM_SYSKEYDOWN ||
-                m.Msg == NativeMethods.WM_SYSKEYUP ||
-                m.Msg == NativeMethods.WM_SYSCHAR)
-            {
-                OnKeyEvent(ref m);
+                //case WM_PAINT:
+                //    if (surfaceBuffer == null) { break; }
+
+                //    IntPtr hdc = NativeMethods.BeginPaint(m.HWnd, out ps);
+
+                //    NativeMethods.BitBlt(hdc, 0, 0, Width, Height, surfaceBuffer.DeviceContext, 0, 0, NativeMethods.TernaryRasterOperations.SRCCOPY);
+                //    NativeMethods.AlphaBlend(hdc, 0, 0, Width, Height, surfaceBuffer.DeviceContext, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, blend);
+
+                //    NativeMethods.EndPaint(m.HWnd, ref ps);
+                //    break;
+                case WM_NCHITTEST:
+                    if (this.Locked) break;
+
+                    var posisiton = new Point(m.LParam.ToInt32() & 0xFFFF, m.LParam.ToInt32() >> 16);
+
+                    posisiton = this.PointToClient(posisiton);
+
+                    if (posisiton.X >= this.ClientSize.Width - gripSize &&
+                        posisiton.Y >= this.ClientSize.Height - gripSize)
+                    {
+                        m.Result = (IntPtr)HTBOTTOMRIGHT;
+                    }
+
+                    break;
+                case NativeMethods.WM_KEYDOWN:
+                case NativeMethods.WM_KEYUP:
+                case NativeMethods.WM_CHAR:
+                case NativeMethods.WM_SYSKEYDOWN:
+                case NativeMethods.WM_SYSKEYUP:
+                case NativeMethods.WM_SYSCHAR:
+                    OnKeyEvent(ref m);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -138,23 +168,22 @@ namespace RainbowMage.OverlayPlugin
         {
             if (surfaceBuffer.IsDisposed || this.terminated) { return; }
 
-            using (var gScreen = Graphics.FromHwnd(this.Handle))
+            using (var gScreen = Graphics.FromHwnd(Handle))
             {
                 var hScreenDC = gScreen.GetHdc();
                 var hOldBitmap = NativeMethods.SelectObject(surfaceBuffer.DeviceContext, surfaceBuffer.Handle);
 
-                var blend = new NativeMethods.BLENDFUNCTION
-                {
-                    BlendOp = NativeMethods.AC_SRC_OVER,
-                    BlendFlags = 0,
-                    SourceConstantAlpha = 255,
-                    AlphaFormat = NativeMethods.AC_SRC_ALPHA
-                };
+                //NativeMethods.BitBlt(hScreenDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, NativeMethods.TernaryRasterOperations.SRCCOPY);
+                var originalPen = NativeMethods.SelectObject(hScreenDC, NativeMethods.GetStockObject(NativeMethods.StockObjects.NULL_PEN));
+                NativeMethods.Rectangle(hScreenDC, 0, 0, Width + 1, Height + 1);
+                NativeMethods.SelectObject(hScreenDC, originalPen);
+
+                NativeMethods.AlphaBlend(hScreenDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, blend);
 
                 //var windowPosition = new NativeMethods.Point
                 //{
-                //    X = this.Left,
-                //    Y = this.Top
+                //    X = Left,
+                //    Y = Top
                 //};
 
                 //var surfaceSize = new NativeMethods.Size
@@ -195,17 +224,14 @@ namespace RainbowMage.OverlayPlugin
                 //            ref surfacePosition,
                 //            0,
                 //            ref blend,
-                //            NativeMethods.ULW_ALPHA);
+                //            NativeMethods.ULW_ALPHA
+                //        );
                 //    }
                 //}
                 //catch (ObjectDisposedException)
                 //{
                 //    return;
-                //}
-
-                NativeMethods.BitBlt(hScreenDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, NativeMethods.TernaryRasterOperations.SRCCOPY);
-                //NativeMethods.TransparentBlt(hScreenDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, 0);
-                //NativeMethods.AlphaBlend(hScreenDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, blend);
+                //}     
 
                 NativeMethods.SelectObject(surfaceBuffer.DeviceContext, hOldBitmap);
                 gScreen.ReleaseHdc(hScreenDC);
@@ -255,7 +281,7 @@ namespace RainbowMage.OverlayPlugin
                 try
                 {
                     if (surfaceBuffer != null &&
-                        (surfaceBuffer.Width != e.Width || surfaceBuffer.Height != e.Height))
+                        (surfaceBuffer.Width != Width || surfaceBuffer.Height != Height))
                     {
                         surfaceBuffer.Dispose();
                         surfaceBuffer = null;
@@ -263,11 +289,16 @@ namespace RainbowMage.OverlayPlugin
 
                     if (surfaceBuffer == null)
                     {
-                        surfaceBuffer = new DIBitmap(e.Width, e.Height);
+                        using (var gScreen = Graphics.FromHwnd(Handle))
+                        {
+                            var hScreenDC = gScreen.GetHdc();
+                            surfaceBuffer = new DIBitmap(Width, Height);
+                            gScreen.ReleaseHdc(hScreenDC);
+                        }
                     }
 
                     // TODO: DirtyRect に対応
-                    surfaceBuffer.SetSurfaceData(e.Buffer, (uint)(e.Width * e.Height * 4));
+                    surfaceBuffer.SetSurfaceData(e.Buffer, (uint)(Width * Height * 4));
 
                     UpdateLayeredWindowBitmap();
                 }
@@ -303,7 +334,11 @@ namespace RainbowMage.OverlayPlugin
                 }
             }, null, 0, 1000);
 
-            TaskbarManager.Instance.SetApplicationIdForSpecificWindow(this.Handle, "redmage1993.OverlayPlugin.com");
+            TaskbarManager.Instance.SetApplicationIdForSpecificWindow(Handle, "redmage1993.OverlayPlugin.com");
+
+            //const int LWA_COLORKEY = 0x00000001;
+
+            //NativeMethods.SetLayeredWindowAttributes(Handle, 0, 0, LWA_COLORKEY);
         }
 
         private void OverlayForm_FormClosed(object sender, FormClosedEventArgs e)

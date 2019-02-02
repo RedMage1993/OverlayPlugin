@@ -12,55 +12,130 @@ namespace RainbowMage.OverlayPlugin
     /// </summary>
     static class NativeMethods
     {
-        //public struct BlendFunction
-        //{
-        //    public byte BlendOp;
-        //    public byte BlendFlags;
-        //    public byte SourceConstantAlpha;
-        //    public byte AlphaFormat;
-        //}
-
         public const byte AC_SRC_ALPHA = 1;
         public const byte AC_SRC_OVER = 0;
 
-        //public struct Point
-        //{
-        //    public int X;
-        //    public int Y;
-        //}
+        public struct Point
+        {
+            public int X;
+            public int Y;
+        }
 
-        //public struct Size
-        //{
-        //    public int Width;
-        //    public int Height;
-        //}
+        public struct Size
+        {
+            public int Width;
+            public int Height;
+        }
 
-        //public struct Rect
-        //{
-        //    public int Left;
-        //    public int Top;
-        //    public int Right;
-        //    public int Bottom;
-        //}
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left, Top, Right, Bottom;
 
-        //[DllImport("user32")]
-        //public static extern bool UpdateLayeredWindow(
-        //    IntPtr hWnd,
-        //    IntPtr hdcDst,
-        //    [In] ref Point pptDst,
-        //    [In]ref Size pSize,
-        //    IntPtr hdcSrc,
-        //    [In]ref Point pptSrc,
-        //    int crKey,
-        //    [In]ref BlendFunction pBlend,
-        //    uint dwFlags);
+            public RECT(int left, int top, int right, int bottom)
+            {
+                Left = left;
+                Top = top;
+                Right = right;
+                Bottom = bottom;
+            }
+
+            public RECT(System.Drawing.Rectangle r) : this(r.Left, r.Top, r.Right, r.Bottom) { }
+
+            public int X
+            {
+                get { return Left; }
+                set { Right -= (Left - value); Left = value; }
+            }
+
+            public int Y
+            {
+                get { return Top; }
+                set { Bottom -= (Top - value); Top = value; }
+            }
+
+            public int Height
+            {
+                get { return Bottom - Top; }
+                set { Bottom = value + Top; }
+            }
+
+            public int Width
+            {
+                get { return Right - Left; }
+                set { Right = value + Left; }
+            }
+
+            public System.Drawing.Point Location
+            {
+                get { return new System.Drawing.Point(Left, Top); }
+                set { X = value.X; Y = value.Y; }
+            }
+
+            public System.Drawing.Size Size
+            {
+                get { return new System.Drawing.Size(Width, Height); }
+                set { Width = value.Width; Height = value.Height; }
+            }
+
+            public static implicit operator System.Drawing.Rectangle(RECT r)
+            {
+                return new System.Drawing.Rectangle(r.Left, r.Top, r.Width, r.Height);
+            }
+
+            public static implicit operator RECT(System.Drawing.Rectangle r)
+            {
+                return new RECT(r);
+            }
+
+            public static bool operator ==(RECT r1, RECT r2)
+            {
+                return r1.Equals(r2);
+            }
+
+            public static bool operator !=(RECT r1, RECT r2)
+            {
+                return !r1.Equals(r2);
+            }
+
+            public bool Equals(RECT r)
+            {
+                return r.Left == Left && r.Top == Top && r.Right == Right && r.Bottom == Bottom;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is RECT)
+                    return Equals((RECT)obj);
+                else if (obj is System.Drawing.Rectangle)
+                    return Equals(new RECT((System.Drawing.Rectangle)obj));
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return ((System.Drawing.Rectangle)this).GetHashCode();
+            }
+
+            public override string ToString()
+            {
+                return string.Format(System.Globalization.CultureInfo.CurrentCulture, "{{Left={0},Top={1},Right={2},Bottom={3}}}", Left, Top, Right, Bottom);
+            }
+        }
+
+        [DllImport("user32")]
+        public static extern bool UpdateLayeredWindow(
+            IntPtr hWnd,
+            IntPtr hdcDst,
+            [In] ref Point pptDst,
+            [In]ref Size pSize,
+            IntPtr hdcSrc,
+            [In]ref Point pptSrc,
+            int crKey,
+            [In]ref BLENDFUNCTION pBlend,
+            uint dwFlags);
 
         public const int ULW_ALPHA = 2;
-
-        [DllImport("gdi32")]
-        public static extern IntPtr SelectObject(
-            IntPtr hdc,
-            IntPtr hgdiobj);
 
         [DllImport("gdi32")]
         public static extern bool DeleteObject(
@@ -304,5 +379,59 @@ namespace RainbowMage.OverlayPlugin
 
         [DllImport("gdi32.dll", EntryPoint = "GdiAlphaBlend")]
         public static extern bool AlphaBlend(IntPtr hdcDest, int nXOriginDest, int nYOriginDest, int nWidthDest, int nHeightDest, IntPtr hdcSrc, int nXOriginSrc, int nYOriginSrc, int nWidthSrc, int nHeightSrc, BLENDFUNCTION blendFunction);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct PAINTSTRUCT
+        {
+            public IntPtr hdc;
+            public bool fErase;
+            public RECT rcPaint;
+            public bool fRestore;
+            public bool fIncUpdate;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+            public byte[] rgbReserved;
+        }
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr BeginPaint(IntPtr hwnd, out PAINTSTRUCT lpPaint);
+
+        [DllImport("user32.dll")]
+        public static extern bool EndPaint(IntPtr hWnd, [In] ref PAINTSTRUCT lpPaint);
+
+        [DllImport("user32.dll")]
+        public static extern bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags);
+
+        [DllImport("gdi32.dll")]
+        public static extern bool Rectangle(IntPtr hdc, int nLeftRect, int nTopRect, int nRightRect, int nBottomRect);
+
+        public enum StockObjects
+        {
+            WHITE_BRUSH = 0,
+            LTGRAY_BRUSH = 1,
+            GRAY_BRUSH = 2,
+            DKGRAY_BRUSH = 3,
+            BLACK_BRUSH = 4,
+            NULL_BRUSH = 5,
+            HOLLOW_BRUSH = NULL_BRUSH,
+            WHITE_PEN = 6,
+            BLACK_PEN = 7,
+            NULL_PEN = 8,
+            OEM_FIXED_FONT = 10,
+            ANSI_FIXED_FONT = 11,
+            ANSI_VAR_FONT = 12,
+            SYSTEM_FONT = 13,
+            DEVICE_DEFAULT_FONT = 14,
+            DEFAULT_PALETTE = 15,
+            SYSTEM_FIXED_FONT = 16,
+            DEFAULT_GUI_FONT = 17,
+            DC_BRUSH = 18,
+            DC_PEN = 19,
+        }
+
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr GetStockObject(StockObjects fnObject);
+
+        [DllImport("gdi32.dll", EntryPoint = "SelectObject")]
+        public static extern IntPtr SelectObject([In] IntPtr hdc, [In] IntPtr hgdiobj);
     }
 }

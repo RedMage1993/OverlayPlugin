@@ -21,6 +21,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(394, 262);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox = false;
@@ -29,6 +30,7 @@
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "OverlayForm";
+            this.TransparencyKey = System.Drawing.Color.White;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OverlayForm_FormClosed);
             this.Load += new System.EventHandler(this.OverlayForm_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OverlayForm_KeyDown);
