@@ -173,12 +173,12 @@ namespace RainbowMage.OverlayPlugin
                 var hWindowDC = gWindow.GetHdc();
                 var hOldBitmap = NativeMethods.SelectObject(surfaceBuffer.DeviceContext, surfaceBuffer.Handle);
 
-                var originalPen = NativeMethods.SelectObject(hWindowDC, NativeMethods.GetStockObject(NativeMethods.StockObjects.NULL_PEN));
-                NativeMethods.Rectangle(hWindowDC, -1, -1, Width + 1, Height + 1);
-                NativeMethods.SelectObject(hWindowDC, originalPen);
+                //var originalPen = NativeMethods.SelectObject(hWindowDC, NativeMethods.GetStockObject(NativeMethods.StockObjects.NULL_PEN));
+                //NativeMethods.Rectangle(hWindowDC, -1, -1, Width + 1, Height + 1);
+                //NativeMethods.SelectObject(hWindowDC, originalPen);
 
-                //NativeMethods.BitBlt(hWindowDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, NativeMethods.TernaryRasterOperations.SRCCOPY);
-                NativeMethods.AlphaBlend(hWindowDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, blend);
+                NativeMethods.BitBlt(hWindowDC, 0, 0, Width, Height, surfaceBuffer.DeviceContext, 0, 0, NativeMethods.TernaryRasterOperations.SRCCOPY);
+                //NativeMethods.AlphaBlend(hWindowDC, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, surfaceBuffer.DeviceContext, 0, 0, surfaceBuffer.Width, surfaceBuffer.Height, blend);
 
                 //var windowPosition = new NativeMethods.Point
                 //{

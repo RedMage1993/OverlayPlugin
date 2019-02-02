@@ -15,17 +15,17 @@ namespace RainbowMage.OverlayPlugin
         public const byte AC_SRC_ALPHA = 1;
         public const byte AC_SRC_OVER = 0;
 
-        public struct Point
-        {
-            public int X;
-            public int Y;
-        }
+        //public struct Point
+        //{
+        //    public int X;
+        //    public int Y;
+        //}
 
-        public struct Size
-        {
-            public int Width;
-            public int Height;
-        }
+        //public struct Size
+        //{
+        //    public int Width;
+        //    public int Height;
+        //}
 
         [StructLayout(LayoutKind.Sequential)]
         public struct RECT
@@ -123,17 +123,17 @@ namespace RainbowMage.OverlayPlugin
             }
         }
 
-        [DllImport("user32")]
-        public static extern bool UpdateLayeredWindow(
-            IntPtr hWnd,
-            IntPtr hdcDst,
-            [In] ref Point pptDst,
-            [In]ref Size pSize,
-            IntPtr hdcSrc,
-            [In]ref Point pptSrc,
-            int crKey,
-            [In]ref BLENDFUNCTION pBlend,
-            uint dwFlags);
+        //[DllImport("user32")]
+        //public static extern bool UpdateLayeredWindow(
+        //    IntPtr hWnd,
+        //    IntPtr hdcDst,
+        //    [In] ref Point pptDst,
+        //    [In]ref Size pSize,
+        //    IntPtr hdcSrc,
+        //    [In]ref Point pptSrc,
+        //    int crKey,
+        //    [In]ref BLENDFUNCTION pBlend,
+        //    uint dwFlags);
 
         public const int ULW_ALPHA = 2;
 
