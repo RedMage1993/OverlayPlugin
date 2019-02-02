@@ -97,7 +97,7 @@ namespace RainbowMage.OverlayPlugin
             {
                 //const int WS_POPUP = unchecked((int)0x80000000);
                 const int WS_EX_TOPMOST = 0x00000008;
-                const int WS_EX_LAYERED = 0x00080000;
+                //const int WS_EX_LAYERED = 0x00080000;
                 const int WS_EX_NOACTIVATE = 0x08000000;
                 const int CS_NOCLOSE = 0x200;
                 const int CS_VREDRAW = 0x0001;
@@ -105,7 +105,7 @@ namespace RainbowMage.OverlayPlugin
 
                 var cp = base.CreateParams;
                 cp.Style = cp.Style;// | WS_POPUP;
-                cp.ExStyle = cp.ExStyle | WS_EX_TOPMOST | WS_EX_NOACTIVATE | WS_EX_LAYERED;
+                cp.ExStyle = cp.ExStyle | WS_EX_TOPMOST | WS_EX_NOACTIVATE;// | WS_EX_LAYERED;
                 cp.ClassStyle = cp.ClassStyle | CS_NOCLOSE | CS_VREDRAW | CS_HREDRAW;
 
                 return cp;
@@ -289,12 +289,12 @@ namespace RainbowMage.OverlayPlugin
 
                     if (surfaceBuffer == null)
                     {
-                        using (var gScreen = Graphics.FromHwnd(Handle))
-                        {
-                            var hScreenDC = gScreen.GetHdc();
+                        //using (var gScreen = Graphics.FromHwnd(Handle))
+                        //{
+                            //var hScreenDC = gScreen.GetHdc();
                             surfaceBuffer = new DIBitmap(e.Width, e.Height);
-                            gScreen.ReleaseHdc(hScreenDC);
-                        }
+                            //gScreen.ReleaseHdc(hScreenDC);
+                        //}
                     }
 
                     // TODO: DirtyRect に対応
@@ -337,7 +337,7 @@ namespace RainbowMage.OverlayPlugin
             TaskbarManager.Instance.SetApplicationIdForSpecificWindow(Handle, "redmage1993.OverlayPlugin.com");
 
             //const int LWA_COLORKEY = 0x00000001;
-
+            
             //NativeMethods.SetLayeredWindowAttributes(Handle, NativeMethods.MakeCOLORREF(255, 255, 255), 0, LWA_COLORKEY);
             //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             //BackColor = Color.Transparent;

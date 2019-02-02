@@ -438,5 +438,19 @@ namespace RainbowMage.OverlayPlugin
         {
             return (((uint)r) | (((uint)g) << 8) | (((uint)b) << 16));
         }
+
+        public enum StretchBltMode : int
+        {
+            STRETCH_ANDSCANS = 1,
+            STRETCH_ORSCANS = 2,
+            STRETCH_DELETESCANS = 3,
+            STRETCH_HALFTONE = 4,
+        }
+
+        [DllImport("gdi32.dll")]
+        public static extern bool StretchBlt(IntPtr hdcDest, int nXOriginDest, int nYOriginDest, int nWidthDest, int nHeightDest, IntPtr hdcSrc, int nXOriginSrc, int nYOriginSrc, int nWidthSrc, int nHeightSrc, TernaryRasterOperations dwRop);
+
+        [DllImport("gdi32.dll")]
+        public static extern int SetStretchBltMode(IntPtr hdc, StretchBltMode iStretchMode);
     }
 }
